@@ -2,41 +2,6 @@ package classifier
 
 import "fmt"
 
-// type Attribute struct {
-// 	name          string
-// 	dtp           arff.DataType
-// 	nominalValues []string
-// 	frequencies   map[interface{}]map[string]int
-// 	probabilities map[interface{}]map[string]float64
-// }
-
-// func NewAttribute(name string, dtp arff.DataType, values []string) (Attribute, error) {
-// 	if dtp == arff.DataTypeNominal && len(values) == 0 {
-// 		return Attribute{}, fmt.Errorf("no nominal values")
-// 	}
-// 	return Attribute{
-// 		name:          name,
-// 		dtp:           dtp,
-// 		nominalValues: values,
-// 	}, nil
-// }
-
-// func (a *Attribute) IncrFreq(class string, value interface{}) error {
-// 	_, ok := a.frequencies[class]
-// 	if !ok {
-// 		log.Println("freq", a.frequencies)
-// 		return fmt.Errorf("no class %s", class)
-// 	}
-// 	a.frequencies[class][value]++
-// 	return nil
-// }
-
-// func (a *Attribute) CalculateProbabilities() error {
-// 	pClass := 1 / len(a.frequencies)
-
-// 	return nil
-// }
-
 type Naive struct {
 	relationName string
 	classes      map[string]int
@@ -44,10 +9,6 @@ type Naive struct {
 	attributesF  []map[int]map[string]int
 	attributesP  []map[int]map[string]float64
 }
-
-// func (n *Naive) IncrFreq(attribute int, class string, value interface{}) error {
-// 	return n.attributes[attribute].IncrFreq(class, value)
-// }
 
 func NewNaive(name string, classes []string, numAttributes int) (Naive, error) {
 	res := Naive{relationName: name}
@@ -127,7 +88,6 @@ func (n *Naive) Classify(values []int) (string, error) {
 			}
 
 		}
-
 	}
 	var max float64 = 0
 	var maxClass string = ""

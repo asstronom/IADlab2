@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/asstronom/IADlab2/classifier"
 	"github.com/bsm/arff"
@@ -38,12 +39,17 @@ func main() {
 		log.Fatalln("error creating naive", err)
 	}
 
-	// err = naive.IncrFreq(0, "benign", 0)
-	// if err != nil {
-	// 	log.Fatalln("error incrementing", err)
-	// }
+	maximum := 300
+	text, ok := os.LookupEnv("NUMINSTANCES")
+	if !ok {
+		log.Fatalln("no env var NUMINSTANCES")
+	}
+	maximum, err = strconv.Atoi(text)
+	if err != nil {
+		log.Fatalln("error converting env var", err)
+	}
 
-	for i := 0; i < 300; i++ {
+	for i := 0; i < int(float64(maximum)*0.66); i++ {
 		if data.Next() {
 			//fmt.Println(data.Row().Values)
 			curClass := data.Row().Values[len(data.Row().Values)-1]
@@ -65,7 +71,7 @@ func main() {
 
 	var count int
 	var total int
-	for i := 0; i < 100; i++ {
+	for i := 0; i < int(float64(maximum)*0.33); i++ {
 		if data.Next() {
 			total++
 			valInter := data.Row().Values[0 : len(data.Row().Values)-1]
@@ -79,7 +85,7 @@ func main() {
 			}
 
 			if response == data.Row().Values[len(data.Row().Values)-1] {
-				fmt.Println(i, data.Row().Values[len(data.Row().Values)-1], response)
+				//fmt.Println(i, data.Row().Values[len(data.Row().Values)-1], response)
 				count++
 			} else {
 				log.Println(i, data.Row().Values[len(data.Row().Values)-1], response)
@@ -88,7 +94,40 @@ func main() {
 		}
 	}
 
-	fmt.Println("Precision:", float64(count)/float64(total))
+	fmt.Println("Precision on testing:", float64(count)/float64(total))
+
+	data1, err := arff.Open("./breast.w.arff")
+	defer data1.Close()
+	if err != nil {
+		log.Fatalln("error opening arff file", err)
+	}
+
+	count = 0
+	total = 0
+	for i := 0; i < int(float64(maximum)*0.66); i++ {
+		if data1.Next() {
+			total++
+			valInter := data1.Row().Values[0 : len(data1.Row().Values)-1]
+			valInt := make([]int, len(valInter))
+			for i2, v := range valInter {
+				valInt[i2] = int(v.(float64))
+			}
+			response, err := naive.Classify(valInt)
+			if err != nil {
+				log.Fatalln("error classifying")
+			}
+
+			if response == data1.Row().Values[len(data1.Row().Values)-1] {
+				//fmt.Println(i, data1.Row().Values[len(data1.Row().Values)-1], response)
+				count++
+			} else {
+				log.Println(i, data1.Row().Values[len(data1.Row().Values)-1], response)
+				log.Println(data1.Row().Values)
+			}
+		}
+	}
+
+	fmt.Println("Precision on training:", float64(count)/float64(total))
 
 	//naive.Debug()
 
